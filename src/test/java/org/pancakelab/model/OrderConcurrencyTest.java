@@ -24,7 +24,7 @@ public class OrderConcurrencyTest {
     public void GivenManyThreads_WhenAddingPancakesToSameOrder_ThenNoPancakeIsLost() throws Exception {
         // setup
         int pancakesPerThread = 1000;
-        Order order = new Order(10, 20);
+        Order order = new Order(new DeliveryAddress(10, 20));
 
         // exercise
         ConcurrentRunner.run(THREADS, thread -> {
@@ -43,7 +43,7 @@ public class OrderConcurrencyTest {
         Set<String> expected = IntStream.range(0, THREADS).mapToObj(thread -> "ingredient " + thread).collect(toSet());
         for (int round = 0; round < 50; round++) {
             // setup
-            Order order = new Order(10, 20);
+            Order order = new Order(new DeliveryAddress(10, 20));
             UUID pancakeId = order.addPancake(Pancake.plain());
 
             // exercise
@@ -61,7 +61,7 @@ public class OrderConcurrencyTest {
     public void GivenPreparedOrder_WhenManyThreadsDeliverIt_ThenOnlyOneSucceeds() throws Exception {
         for (int round = 0; round < 200; round++) {
             // setup
-            Order order = new Order(10, 20);
+            Order order = new Order(new DeliveryAddress(10, 20));
             order.addPancake(Pancake.plain());
             order.complete();
             order.prepare();
@@ -87,7 +87,7 @@ public class OrderConcurrencyTest {
     public void GivenCreatedOrder_WhenCompletingAndCancellingConcurrently_ThenOrderEndsCancelled() throws Exception {
         for (int round = 0; round < 200; round++) {
             // setup
-            Order order = new Order(10, 20);
+            Order order = new Order(new DeliveryAddress(10, 20));
             order.addPancake(Pancake.plain());
             AtomicInteger completions = new AtomicInteger();
             AtomicInteger cancellations = new AtomicInteger();
@@ -119,7 +119,7 @@ public class OrderConcurrencyTest {
     public void GivenCompletedOrder_WhenManyThreadsPrepareIt_ThenOnlyOneSucceeds() throws Exception {
         for (int round = 0; round < 1000; round++) {
             // setup
-            Order order = new Order(10, 20);
+            Order order = new Order(new DeliveryAddress(10, 20));
             order.addPancake(Pancake.plain());
             order.complete();
             AtomicInteger preparations = new AtomicInteger();
@@ -145,7 +145,7 @@ public class OrderConcurrencyTest {
         int pancakesPerThread = 500;
         for (int round = 0; round < 20; round++) {
             // setup
-            Order order = new Order(10, 20);
+            Order order = new Order(new DeliveryAddress(10, 20));
             List<List<UUID>> idsPerThread = new ArrayList<>();
             for (int thread = 0; thread < THREADS; thread++) {
                 List<UUID> ids = new ArrayList<>();
@@ -168,7 +168,7 @@ public class OrderConcurrencyTest {
     public void GivenManyThreads_WhenReadingPancakesWhileOthersAddThem_ThenNoReadFails() throws Exception {
         // setup
         int operationsPerThread = 500;
-        Order order = new Order(10, 20);
+        Order order = new Order(new DeliveryAddress(10, 20));
 
         // exercise
         ConcurrentRunner.run(THREADS, thread -> {

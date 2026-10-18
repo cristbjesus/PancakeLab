@@ -19,9 +19,21 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class OrderTest {
     @Test
+    public void GivenDeliveryAddress_WhenCreatingOrder_ThenOrderKeepsTheAddress() {
+        // setup
+        DeliveryAddress address = new DeliveryAddress(10, 20);
+
+        // exercise
+        Order order = new Order(address);
+
+        // verify
+        assertEquals(address, order.getAddress());
+    }
+
+    @Test
     public void GivenNewOrder_WhenCheckingStatus_ThenOrderIsCreated() {
         // exercise
-        Order order = new Order(10, 20);
+        Order order = new Order(new DeliveryAddress(10, 20));
 
         // verify
         assertEquals(OrderStatus.CREATED, order.getStatus());
@@ -42,7 +54,7 @@ public class OrderTest {
     @Test
     public void GivenEmptyOrder_WhenCompleting_ThenEmptyOrderExceptionThrown() {
         // setup
-        Order order = new Order(10, 20);
+        Order order = new Order(new DeliveryAddress(10, 20));
 
         // exercise
         EmptyOrderException exception = assertThrows(EmptyOrderException.class, order::complete);
@@ -162,7 +174,7 @@ public class OrderTest {
     @Test
     public void GivenPancakesAdded_WhenGettingPancakes_ThenIdsAndDescriptionsInOrderOfAddition() {
         // setup
-        Order order = new Order(10, 20);
+        Order order = new Order(new DeliveryAddress(10, 20));
         UUID first = order.addPancake(Pancake.plain().with(new Ingredient("milk chocolate")));
         UUID second = order.addPancake(Pancake.plain());
 
@@ -179,7 +191,7 @@ public class OrderTest {
     @Test
     public void GivenPancakeInOrder_WhenAddingIngredientsById_ThenPancakeDescriptionIncludesThem() {
         // setup
-        Order order = new Order(10, 20);
+        Order order = new Order(new DeliveryAddress(10, 20));
         UUID pancakeId = order.addPancake(Pancake.plain());
 
         // exercise
@@ -223,7 +235,7 @@ public class OrderTest {
     @Test
     public void GivenIdenticalPancakesInOrder_WhenRemovingOneById_ThenOnlyThatPancakeRemoved() {
         // setup
-        Order order = new Order(10, 20);
+        Order order = new Order(new DeliveryAddress(10, 20));
         UUID first = order.addPancake(Pancake.plain());
         UUID second = order.addPancake(Pancake.plain());
         UUID third = order.addPancake(Pancake.plain());
@@ -268,7 +280,7 @@ public class OrderTest {
     @Test
     public void GivenManyPancakesAdded_WhenGettingPancakes_ThenTheyKeepTheOrderOfAddition() {
         // setup
-        Order order = new Order(10, 20);
+        Order order = new Order(new DeliveryAddress(10, 20));
         List<UUID> addedIds = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             addedIds.add(order.addPancake(Pancake.plain()));
@@ -293,7 +305,7 @@ public class OrderTest {
     @Test
     public void GivenEmptyOrderCancelled_WhenCompleting_ThenInvalidOrderStateExceptionThrown() {
         // setup
-        Order order = new Order(10, 20);
+        Order order = new Order(new DeliveryAddress(10, 20));
         order.cancel();
 
         // exercise
@@ -308,7 +320,7 @@ public class OrderTest {
     }
 
     private Order orderIn(OrderStatus status) {
-        Order order = new Order(10, 20);
+        Order order = new Order(new DeliveryAddress(10, 20));
         order.addPancake(Pancake.plain());
         switch (status) {
             case CREATED -> {

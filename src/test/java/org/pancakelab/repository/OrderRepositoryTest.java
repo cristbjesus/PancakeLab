@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.pancakelab.exception.OrderNotFoundException;
+import org.pancakelab.model.DeliveryAddress;
 import org.pancakelab.model.Order;
 import org.pancakelab.model.OrderStatus;
 import org.pancakelab.model.Pancake;
@@ -23,7 +24,7 @@ public class OrderRepositoryTest {
     @Test
     public void GivenSavedOrder_WhenFindingById_ThenOrderReturned() {
         // setup
-        Order order = new Order(10, 20);
+        Order order = new Order(new DeliveryAddress(10, 20));
         repository.save(order);
 
         // exercise
@@ -47,7 +48,7 @@ public class OrderRepositoryTest {
     @Test
     public void GivenSavedOrder_WhenRemoving_ThenOrderNoLongerFound() {
         // setup
-        Order order = new Order(10, 20);
+        Order order = new Order(new DeliveryAddress(10, 20));
         repository.save(order);
 
         // exercise
@@ -71,7 +72,7 @@ public class OrderRepositoryTest {
     @Test
     public void GivenOrdersInDifferentStatuses_WhenFindingByStatus_ThenOnlyMatchingOrdersReturned() {
         // setup
-        Order created = new Order(10, 20);
+        Order created = new Order(new DeliveryAddress(10, 20));
         Order firstCompleted = completedOrder();
         Order secondCompleted = completedOrder();
         repository.save(created);
@@ -91,7 +92,7 @@ public class OrderRepositoryTest {
     }
 
     private static Order completedOrder() {
-        Order order = new Order(10, 20);
+        Order order = new Order(new DeliveryAddress(10, 20));
         order.addPancake(Pancake.plain());
         order.complete();
         return order;
