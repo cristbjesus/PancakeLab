@@ -1,6 +1,8 @@
 package org.pancakelab.service;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
+import org.pancakelab.ConcurrentRunner;
 
 import java.util.List;
 
@@ -33,5 +35,23 @@ public class InMemoryOrderLogTest {
 
         // verify
         assertThrows(UnsupportedOperationException.class, entries::clear);
+    }
+
+    @Test
+    @Timeout(30)
+    public void GivenManyThreads_WhenLoggingConcurrently_ThenNoEntryIsLost() throws Exception {
+        // setup
+        int threads = 16;
+        int entriesPerThread = 1000;
+
+        // exercise
+        ConcurrentRunner.run(threads, thread -> {
+            for (int i = 0; i < entriesPerThread; i++) {
+                log.log("entry " + i + " from thread " + thread);
+            }
+        });
+
+        // verify
+        assertEquals(threads * entriesPerThread, log.entries().size());
     }
 }
