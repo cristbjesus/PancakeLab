@@ -39,3 +39,46 @@ The Sensei has put forth some conditions:
 
 
 Start now your assignment and save the Dojo.
+
+
+## Design decisions
+The assignment leaves some points open. The following decisions were taken before starting the refactoring:
+
+| Topic                   | Decision                                                                                                                                                                                                                                                                                                      |
+|-------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Buildings and rooms     | The registry of known buildings is supplied by the API client when creating the service, so buildings can change without recompiling the library. Orders are accepted only for registered buildings; any other building is rejected. There is no registry of rooms: room numbers only need to be positive.    |
+| Cancelling an order     | The Disciple can cancel an Order while creating it and also after completing it, as long as the Chef has not prepared it yet.                                                                                                                                                                                 |
+| Menu                    | The menu is supplied by the API client when creating the service, so ingredients can change without recompiling the library. The Dojo's menu contains exactly these ingredients: dark chocolate, milk chocolate, whipped cream and hazelnuts. Mustard, and any other ingredient not on the menu, is rejected. |
+| Ingredient combinations | Ingredients from the menu can be combined freely, e.g. a pancake with both dark chocolate and milk chocolate. The same ingredient cannot be added twice to the same pancake.                                                                                                                                  |
+| Plain pancakes          | A pancake without any ingredient is valid.                                                                                                                                                                                                                                                                    |
+| API                     | The public API stays close to the current `PancakeService` signatures, changing only where the Sensei's conditions require it (e.g. not exposing domain objects and adding pancakes ingredient by ingredient).                                                                                                |
+
+### Order lifecycle
+
+```mermaid
+stateDiagram-v2
+    [*] --> Created: create order
+    Created --> Completed: complete
+    Created --> [*]: cancel (removed)
+    Completed --> [*]: cancel (removed)
+    Completed --> Prepared: prepare (Chef)
+    Prepared --> [*]: deliver (removed)
+```
+
+## Building and testing
+
+Requirements:
+- Java 17
+- Maven 3.9.0 or newer
+
+Run the tests:
+
+```shell
+mvn test
+```
+
+Compile, test, and package all at once:
+
+```shell
+mvn package
+```
