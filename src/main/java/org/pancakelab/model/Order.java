@@ -1,12 +1,13 @@
 package org.pancakelab.model;
 
+import org.pancakelab.dto.PancakeDetails;
 import org.pancakelab.exception.EmptyOrderException;
 import org.pancakelab.exception.InvalidOrderStateException;
-import org.pancakelab.exception.InvalidPancakeCountException;
+import org.pancakelab.exception.PancakeNotFoundException;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -14,7 +15,7 @@ public class Order {
     private final UUID id;
     private final int building;
     private final int room;
-    private final List<Pancake> pancakes = new ArrayList<>();
+    private final Map<UUID, Pancake> pancakes = new LinkedHashMap<>();
     private OrderStatus status = OrderStatus.CREATED;
 
     public Order(int building, int room) {
@@ -27,29 +28,33 @@ public class Order {
         return status;
     }
 
-    public void addPancake(Pancake pancake) {
+    public UUID addPancake(Pancake pancake) {
         requireStatus(OrderStatus.CREATED);
-        pancakes.add(pancake);
+        UUID pancakeId = UUID.randomUUID();
+        pancakes.put(pancakeId, pancake);
+        return pancakeId;
     }
 
-    public int removePancakes(String description, int count) {
+    public void addIngredient(UUID pancakeId, Ingredient ingredient) {
         requireStatus(OrderStatus.CREATED);
-        if (count <= 0) {
-            throw new InvalidPancakeCountException(count);
+        Pancake pancake = pancakes.get(pancakeId);
+        if (pancake == null) {
+            throw new PancakeNotFoundException(pancakeId);
         }
-        int removed = 0;
-        Iterator<Pancake> iterator = pancakes.iterator();
-        while (iterator.hasNext() && removed < count) {
-            if (iterator.next().description().equals(description)) {
-                iterator.remove();
-                removed++;
-            }
-        }
-        return removed;
+        pancakes.put(pancakeId, pancake.with(ingredient));
     }
 
-    public List<String> getPancakeDescriptions() {
-        return pancakes.stream().map(Pancake::description).toList();
+    public void removePancake(UUID pancakeId) {
+        requireStatus(OrderStatus.CREATED);
+        if (pancakes.remove(pancakeId) == null) {
+            throw new PancakeNotFoundException(pancakeId);
+        }
+    }
+
+    public List<PancakeDetails> getPancakes() {
+        return pancakes.entrySet().stream()
+                .map(entry -> new PancakeDetails(entry.getKey(), entry.getValue().description()))
+                .toList();
     }
 
     public void complete() {
