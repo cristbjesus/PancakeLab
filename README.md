@@ -102,3 +102,8 @@ java -cp target/classes org.pancakelab.Main
 
 `Main` can be freely modified to simulate other scenarios of real API usage. Its only test (`MainTest`) runs the use case
 and fails on any unexpected error, or if an operation the demo expects to be rejected is accepted.
+
+## Documentation
+
+UML diagrams of the solution (classes, DTOs and exceptions, order lifecycle and use-case sequences) are in
+[docs/uml.md](docs/uml.md).
