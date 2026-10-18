@@ -3,8 +3,12 @@ package org.pancakelab.model;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.pancakelab.exception.EmptyOrderException;
 import org.pancakelab.exception.InvalidOrderStateException;
+import org.pancakelab.exception.InvalidPancakeCountException;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -134,6 +138,100 @@ public class OrderTest {
         // verify
         assertEquals(order.getId(), exception.getOrderId());
         assertEquals(status.name(), exception.getStatus());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = OrderStatus.class, mode = EnumSource.Mode.EXCLUDE, names = "CREATED")
+    public void GivenOrderNotCreated_WhenAddingPancake_ThenInvalidOrderStateExceptionThrown(OrderStatus status) {
+        // setup
+        Order order = orderIn(status);
+
+        // exercise
+        InvalidOrderStateException exception =
+                assertThrows(InvalidOrderStateException.class, () -> order.addPancake(Pancake.plain()));
+
+        // verify
+        assertEquals(order.getId(), exception.getOrderId());
+        assertEquals(status.name(), exception.getStatus());
+    }
+
+    @Test
+    public void GivenPancakesAdded_WhenGettingDescriptions_ThenDescriptionsInOrderOfAddition() {
+        // setup
+        Order order = new Order(10, 20);
+        order.addPancake(Pancake.plain().with(new Ingredient("milk chocolate")));
+        order.addPancake(Pancake.plain());
+
+        // exercise
+        List<String> descriptions = order.getPancakeDescriptions();
+
+        // verify
+        assertEquals(List.of("Delicious pancake with milk chocolate!", "Delicious pancake!"), descriptions);
+    }
+
+    @Test
+    public void GivenMatchingPancakes_WhenRemovingSomeOfThem_ThenFirstMatchesRemovedAndOthersKeptInOrder() {
+        // setup
+        Pancake dark = Pancake.plain().with(new Ingredient("dark chocolate"));
+        Pancake milk = Pancake.plain().with(new Ingredient("milk chocolate"));
+        Order order = new Order(10, 20);
+        order.addPancake(dark);
+        order.addPancake(milk);
+        order.addPancake(dark);
+        order.addPancake(dark);
+
+        // exercise
+        int removed = order.removePancakes(dark.description(), 2);
+
+        // verify
+        assertEquals(2, removed);
+        assertEquals(List.of(milk.description(), dark.description()), order.getPancakeDescriptions());
+    }
+
+    @Test
+    public void GivenFewerMatchingPancakesThanRequested_WhenRemoving_ThenAllMatchesRemovedAndActualCountReturned() {
+        // setup
+        Pancake dark = Pancake.plain().with(new Ingredient("dark chocolate"));
+        Order order = new Order(10, 20);
+        order.addPancake(dark);
+        order.addPancake(Pancake.plain());
+        order.addPancake(dark);
+
+        // exercise
+        int removed = order.removePancakes(dark.description(), 5);
+
+        // verify
+        assertEquals(2, removed);
+        assertEquals(List.of("Delicious pancake!"), order.getPancakeDescriptions());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = OrderStatus.class, mode = EnumSource.Mode.EXCLUDE, names = "CREATED")
+    public void GivenOrderNotCreated_WhenRemovingPancakes_ThenInvalidOrderStateExceptionThrown(OrderStatus status) {
+        // setup
+        Order order = orderIn(status);
+
+        // exercise
+        InvalidOrderStateException exception =
+                assertThrows(InvalidOrderStateException.class, () -> order.removePancakes("Delicious pancake!", 1));
+
+        // verify
+        assertEquals(order.getId(), exception.getOrderId());
+        assertEquals(status.name(), exception.getStatus());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, -1, Integer.MIN_VALUE})
+    public void GivenNonPositiveCount_WhenRemovingPancakes_ThenInvalidPancakeCountExceptionThrown(int count) {
+        // setup
+        Order order = orderIn(OrderStatus.CREATED);
+
+        // exercise
+        InvalidPancakeCountException exception = assertThrows(InvalidPancakeCountException.class,
+                () -> order.removePancakes("Delicious pancake!", count));
+
+        // verify
+        assertEquals(count, exception.getCount());
     }
 
     @Test
