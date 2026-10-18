@@ -52,6 +52,7 @@ The assignment leaves some points open. The following decisions were taken befor
 | Ingredient combinations | Ingredients from the menu can be combined freely, e.g. a pancake with both dark chocolate and milk chocolate. The same ingredient cannot be added twice to the same pancake.                                                                                                                                  |
 | Plain pancakes          | A pancake without any ingredient is valid.                                                                                                                                                                                                                                                                    |
 | API                     | The public API stays close to the current `PancakeService` signatures, changing only where the Sensei's conditions require it (e.g. not exposing domain objects and adding pancakes ingredient by ingredient).                                                                                                |
+| Pancake identification  | Each pancake gets an id when added. Ingredients are added and pancakes removed by that id, and viewing an order shows each pancake's id and description. Removal by description and count was dropped: more robust, though further from the original `PancakeService` signatures, as the assignment allows.   |
 
 ### Order lifecycle
 
