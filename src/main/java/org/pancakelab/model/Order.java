@@ -24,18 +24,18 @@ public class Order {
         this.room = room;
     }
 
-    public OrderStatus getStatus() {
+    public synchronized OrderStatus getStatus() {
         return status;
     }
 
-    public UUID addPancake(Pancake pancake) {
+    public synchronized UUID addPancake(Pancake pancake) {
         requireStatus(OrderStatus.CREATED);
         UUID pancakeId = UUID.randomUUID();
         pancakes.put(pancakeId, pancake);
         return pancakeId;
     }
 
-    public void addIngredient(UUID pancakeId, Ingredient ingredient) {
+    public synchronized void addIngredient(UUID pancakeId, Ingredient ingredient) {
         requireStatus(OrderStatus.CREATED);
         Pancake pancake = pancakes.get(pancakeId);
         if (pancake == null) {
@@ -44,20 +44,20 @@ public class Order {
         pancakes.put(pancakeId, pancake.with(ingredient));
     }
 
-    public void removePancake(UUID pancakeId) {
+    public synchronized void removePancake(UUID pancakeId) {
         requireStatus(OrderStatus.CREATED);
         if (pancakes.remove(pancakeId) == null) {
             throw new PancakeNotFoundException(pancakeId);
         }
     }
 
-    public List<PancakeDetails> getPancakes() {
+    public synchronized List<PancakeDetails> getPancakes() {
         return pancakes.entrySet().stream()
                 .map(entry -> new PancakeDetails(entry.getKey(), entry.getValue().description()))
                 .toList();
     }
 
-    public void complete() {
+    public synchronized void complete() {
         requireStatus(OrderStatus.CREATED);
         if (pancakes.isEmpty()) {
             throw new EmptyOrderException(id);
@@ -65,17 +65,17 @@ public class Order {
         status = OrderStatus.COMPLETED;
     }
 
-    public void prepare() {
+    public synchronized void prepare() {
         requireStatus(OrderStatus.COMPLETED);
         status = OrderStatus.PREPARED;
     }
 
-    public void deliver() {
+    public synchronized void deliver() {
         requireStatus(OrderStatus.PREPARED);
         status = OrderStatus.DELIVERED;
     }
 
-    public void cancel() {
+    public synchronized void cancel() {
         requireStatus(OrderStatus.CREATED, OrderStatus.COMPLETED);
         status = OrderStatus.CANCELLED;
     }
