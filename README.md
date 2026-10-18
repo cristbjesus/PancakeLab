@@ -83,3 +83,22 @@ Compile, test, and package all at once:
 ```shell
 mvn package
 ```
+
+## Running the demo
+
+`Main` is a demo client of the API. It supplies the Dojo's menu and registered buildings to `PancakeService` and runs a
+complete, hard-coded use case: a Disciple orders pancakes ingredient by ingredient, Dr. Fu Man Chu's attempts are
+rejected, the order is completed, prepared and delivered, another order is cancelled, and the order log is printed.
+
+Compile and run it:
+
+```shell
+mvn compile
+```
+
+```shell
+java -cp target/classes org.pancakelab.Main
+```
+
+`Main` can be freely modified to simulate other scenarios of real API usage. Its only test (`MainTest`) runs the use case
+and fails on any unexpected error, or if an operation the demo expects to be rejected is accepted.
