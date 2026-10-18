@@ -2,8 +2,10 @@ package org.pancakelab.model;
 
 import org.pancakelab.exception.EmptyOrderException;
 import org.pancakelab.exception.InvalidOrderStateException;
+import org.pancakelab.exception.InvalidPancakeCountException;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -26,7 +28,28 @@ public class Order {
     }
 
     public void addPancake(Pancake pancake) {
+        requireStatus(OrderStatus.CREATED);
         pancakes.add(pancake);
+    }
+
+    public int removePancakes(String description, int count) {
+        requireStatus(OrderStatus.CREATED);
+        if (count <= 0) {
+            throw new InvalidPancakeCountException(count);
+        }
+        int removed = 0;
+        Iterator<Pancake> iterator = pancakes.iterator();
+        while (iterator.hasNext() && removed < count) {
+            if (iterator.next().description().equals(description)) {
+                iterator.remove();
+                removed++;
+            }
+        }
+        return removed;
+    }
+
+    public List<String> getPancakeDescriptions() {
+        return pancakes.stream().map(Pancake::description).toList();
     }
 
     public void complete() {
