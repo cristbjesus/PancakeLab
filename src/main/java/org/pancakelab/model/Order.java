@@ -13,15 +13,13 @@ import java.util.UUID;
 
 public class Order {
     private final UUID id;
-    private final int building;
-    private final int room;
+    private final DeliveryAddress address;
     private final Map<UUID, Pancake> pancakes = new LinkedHashMap<>();
     private OrderStatus status = OrderStatus.CREATED;
 
-    public Order(int building, int room) {
+    public Order(DeliveryAddress address) {
         this.id = UUID.randomUUID();
-        this.building = building;
-        this.room = room;
+        this.address = address;
     }
 
     public synchronized OrderStatus getStatus() {
@@ -90,12 +88,8 @@ public class Order {
         return id;
     }
 
-    public int getBuilding() {
-        return building;
-    }
-
-    public int getRoom() {
-        return room;
+    public DeliveryAddress getAddress() {
+        return address;
     }
 
     @Override

@@ -32,8 +32,7 @@ public class PancakeService {
     }
 
     public UUID createOrder(int building, int room) {
-        DeliveryAddress address = buildingRegistry.addressFor(building, room);
-        Order order = new Order(address.building(), address.room());
+        Order order = new Order(buildingRegistry.addressFor(building, room));
         orders.save(order);
         UUID orderId = order.getId();
         log.log("Created order %s for %s.".formatted(orderId, destination(order)));
@@ -93,7 +92,8 @@ public class PancakeService {
         List<String> pancakes = order.getPancakes().stream().map(PancakeDetails::description).toList();
         log.log("Order %s with %d pancake(s) for %s out for delivery."
                 .formatted(orderId, pancakes.size(), destination(order)));
-        return new DeliveryDetails(orderId, order.getBuilding(), order.getRoom(), pancakes);
+        DeliveryAddress address = order.getAddress();
+        return new DeliveryDetails(orderId, address.building(), address.room(), pancakes);
     }
 
     public void cancelOrder(UUID orderId) {
@@ -109,6 +109,7 @@ public class PancakeService {
     }
 
     private static String destination(Order order) {
-        return "building %d, room %d".formatted(order.getBuilding(), order.getRoom());
+        DeliveryAddress address = order.getAddress();
+        return "building %d, room %d".formatted(address.building(), address.room());
     }
 }
